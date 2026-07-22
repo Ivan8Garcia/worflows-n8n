@@ -1,0 +1,179 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "69150b2a-fd56-4350-ac45-23a713115cf0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"nombre\": \"maria\",\n  \"usuario_activo\" : true,\n  \"edad\": 21\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        -160
+      ],
+      "id": "6d9e534a-f88a-4835-ab37-18502dead3ba",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "539b5597-f4df-445b-83a1-3b56ab04f7c1",
+              "leftValue": "={{ $json.usuario_activo }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9e997468-7945-42c5-a79a-92d4366e15c2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "704bd5f3-4bcc-40e2-a13b-74e3dbd6bd12",
+              "name": "mensaje",
+              "value": "=Enviaré un mensaje a  {{ $json.nombre }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "f082d6e5-606d-43a9-a7a8-127fb65beed4",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "410cfabe-0d75-4a14-ac37-c8576438b84a",
+              "name": "mensaje",
+              "value": "No se enviará ningun mensaje porque el usuario no está activo",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        96
+      ],
+      "id": "f4b903a3-27d0-4349-b54d-60f6ea10cfb5",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\"nombre\":\"Maria\",\"usuario_activo\":true,\"edad\":28},\n  {\"nombre\":\"Pedro\",\"usuario_activo\":false,\"edad\":35},\n  {\"nombre\":\"Julia\",\"usuario_activo\":true,\"edad\":23}\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "8eda9497-7fd4-4273-9c24-9bbff692264f",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
