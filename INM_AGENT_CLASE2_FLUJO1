@@ -1,0 +1,257 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8f009c61-8a26-4c58-84a0-a93167b6384b",
+      "name": "When chat message received",
+      "webhookId": "2bcc6196-f50c-4e9d-89c6-9e39e1e3dfff"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Eres el HR Buddy, asistente virtual de RR. HH. de ChocolaTech.\n\nREGLAS:\n1. Responde siempre en español.\n2. Responde SOLO dudas relacionadas con RR. HH.\n\nIDENTIFICACIÓN DEL EMPLEADO:\n- Si el usuario no dice quién es, pregúntale su nombre completo en la primera respuesta.\n- Usa la herramienta MySQL para buscar en la tabla funcionarios usando SIEMPRE el NOMBRE COMPLETO informado por el usuario en la conversación.\n- Si se encuentra: usa los saldos de vacaciones y banco de horas.\n- Si no se encuentra: no inventes datos personales. Responde solo con base en las políticas generales de RR. HH. del Vector Store.\n\nUsa la base de conocimientos para dudas generales."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "509bd93d-bf75-4a12-980c-1609a0412964",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "78e5d243-5f9b-41c2-9871-2c3f26e61f73",
+      "name": "Cohere Chat Model",
+      "credentials": {
+        "cohereApi": {
+          "id": "WaJrcsV7XNokH7W2",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        208
+      ],
+      "id": "b676078d-4645-4944-88e4-5484c2b3815d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "busca informacion sobre RR.HH., asuntos con vacaciones, horarios, etc.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        208
+      ],
+      "id": "1a156ea4-de72-41ab-9873-50794e813669",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        432,
+        352
+      ],
+      "id": "42cc6100-67d5-4fb0-a01c-8e688703617f",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "WaJrcsV7XNokH7W2",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "primer paso será conectar la base de datos creada en railway con la base de datos de n8n.\n\npara ello hicimos una copia del flujo 2 clase 1, para poder hacer unas cuantas modificaciones",
+        "height": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "83c0c748-9ea1-4cba-ac9f-27d848ef672d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.mySqlTool",
+      "typeVersion": 2.5,
+      "position": [
+        656,
+        176
+      ],
+      "id": "b3901195-58b3-453e-944a-ab053c9f8515",
+      "name": "Select rows from a table in MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "GkJQZIPrCSwx49eG",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## PARA SELECT ROWS FROM A TABLE IN MYSQL\n\ntengo suspendida la cuenta de railway. \npor lo tanto no va a funcionar correctamente mysql ya que no pude crear la tabla \"empleados\" en railway.\n\nfalta meter la tabla en la ultima linea. cuando tenga activa la cuenta de railway podré intregrar la tabla creada y apareceran mas opciones que en este momento no puedo meter.\n\nejemplo:\n\"select rows\"-> \ncolumn ->\"nombre\"\noperator-> \"like\"\nvalue->\"defined automatically by model\"\ndescripcion: \"usa siempre el formato %nombre% para busqueda parcial. por ejemplo: %Eric Monné%\n\n\n",
+        "height": 448,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        784,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "b1071954-574d-47ab-92e1-bc21e16f9334",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "CREATE TABLE empleados (  \n    id INT AUTO_INCREMENT PRIMARY KEY,  \n    nombre VARCHAR(100) NOT NULL,  \n    email VARCHAR(150) NOT NULL UNIQUE,  \n    departamento VARCHAR(100) NOT NULL,  \n    puesto VARCHAR(100) NOT NULL,  \n    fecha_ingreso DATE NOT NULL,  \n    saldo_vacaciones INT NOT NULL DEFAULT 0,  \n    banco_horas DECIMAL(5,1) NOT NULL DEFAULT 0,  \n    modalidad VARCHAR(20) NOT NULL DEFAULT 'hibrido'  \n);\n\n\n\nINSERT INTO empleados (nombre, email, departamento, puesto, fecha_ingreso, saldo_vacaciones, banco_horas, modalidad) VALUES  \n('Juan Silva', 'juan.silva@empresa.com', 'Ingeniería', 'Ingeniero de Software', '2022-03-10', 20, 0.0, 'hibrido'),  \n('María Gonzalez', 'maria.gonzalez@empresa.com', 'Recursos Humanos', 'Analista de RR. HH.', '2021-05-15', 5, 12.5, 'hibrido'),  \n('Carlos Olivera', 'carlos.olivera@empresa.com', 'Finanzas', 'Analista Financiero', '2023-01-20', 0, 0.0, 'presencial'),  \n('Ana Lima', 'ana.lima@empresa.com', 'Marketing', 'Especialista en Marketing', '2020-11-05', 15, -4.0, 'remoto'),  \n('Pedro Santos', 'pedro.santos@empresa.com', 'Ventas', 'Ejecutivo de Ventas', '2022-08-01', 10, 8.0, 'hibrido'),  \n('Fernanda Costa', 'fernanda.costa@empresa.com', 'Operaciones', 'Gerente de Operaciones', '2019-02-12', 30, 0.0, 'presencial'),  \n('Rafael Mendez', 'rafael.mendez@empresa.com', 'TI', 'Analista de Soporte', '2023-06-10', 0, 15.5, 'hibrido'),  \n('Juliana García', 'juliana.garcía@empresa.com', 'Ingeniería', 'Desarrolladora Front-end', '2021-09-25', 12, 0.0, 'remoto'),  \n('Bruno Alvarez', 'bruno.alvarez@empresa.com', 'Diseño', 'Diseñador UX/UI', '2022-04-18', 8, 3.5, 'hibrido'),  \n('Camila Herrera', 'camila.herrera@empresa.com', 'Atención al Cliente', 'Analista de Atención al Cliente', '2024-01-05', 0, 0.0, 'hibrido'),  \n('Eric Monné', 'eric.monne@chocolatech.com', 'Producto', 'Instructor de Cursos', '2024-01-15', 25, 8.0, 'hibrido');",
+        "height": 272,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        464
+      ],
+      "typeVersion": 1,
+      "id": "9c2f9396-ffb5-4f0e-9fbd-6cc736db97f7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "##System Prompt del Agente:\n\n\"Eres el HR Buddy, asistente virtual de RR. HH. de ChocolaTech.\nREGLAS:\n\nResponde siempre en español.\nResponde SOLO dudas relacionadas con RR. HH.\nIDENTIFICACIÓN DEL EMPLEADO:\nSi el usuario no dice quién es, pregúntale su nombre completo en la primera respuesta.\nUsa la herramienta MySQL para buscar en la tabla funcionarios usando SIEMPRE el NOMBRE COMPLETO informado por el usuario en la conversación.\nSi se encuentra: usa los saldos de vacaciones y banco de horas.\nSi no se encuentra: no inventes datos personales. Responde solo con base en las políticas generales de RR. HH. del Vector Store.\nUsa la base de conocimientos para dudas generales.\"",
+        "height": 336,
+        "width": 688
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -576,
+        752
+      ],
+      "typeVersion": 1,
+      "id": "602f6c19-449e-44f0-b671-640860b20b0a",
+      "name": "Sticky Note3"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table in MySQL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
