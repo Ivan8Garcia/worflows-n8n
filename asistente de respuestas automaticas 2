@@ -1,0 +1,417 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        128
+      ],
+      "id": "fe2ac4e9-0ee9-475d-ba9a-f9b7514e8e6c",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38c76478-8eb0-4693-9094-cdf200c2894b",
+              "name": "Asunto:",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "0f14b342-8719-48df-9bee-ad2434b3e2e7",
+              "name": "Mensaje:",
+              "value": "={{ $json.bodyPreview }}",
+              "type": "string"
+            },
+            {
+              "id": "8b5be4a3-4cc7-49ef-ad8c-e266e797f2b3",
+              "name": "destinatario:",
+              "value": "={{ $json.from }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        128
+      ],
+      "id": "6e2afdcb-e738-4209-9598-41106d15b786",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Edit Fields').item.json['destinatario:'] }}",
+        "subject": "={{ $('Edit Fields').item.json['Asunto:'] }}",
+        "bodyContent": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        784,
+        -80
+      ],
+      "id": "bb3b44d8-472c-43bc-a2ba-8224ea9f39da",
+      "name": "Send a message",
+      "webhookId": "d9f9ac1b-981e-4329-b66b-8d65d6417f9b",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres un asistente virtual de flexData. tu meta es responder amablemente las preguntas frecuentes de clientes que aparecen a continuacion en **Preguntas frecuentes**. si la pregunta no está en **Preguntas Frecuentes** responde diciendo que el equipo de soporte entrará en contacto con ellos a la brevedad-\n\n##Preguntas frecuentes:\n\n1. nuestro horario de atencion es de lunes a viernes, de 8:00 a 18:00.\n2. Para solicitar una factura duplicada, accede a https://flexdata.com.br/fatura.\n3. Para cancelar tu suscripcion, envia una solicitud a cancelamento@flexdata.com.br.\n4. Nuestro numero de telefono es (11) 4000-1234."
+            },
+            {
+              "content": "=Mensaje del cliente: {{ $json['Mensaje:'] }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -80
+      ],
+      "id": "a35568f3-f16f-40b7-b47c-d886905aa9eb",
+      "name": "Asistente virtual para responder preguntas automaticas",
+      "credentials": {},
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "##nuevos requirimientos para el flujo\n\nalgunos correos son de clientes preguntando cosas muy especificas que la IA  no deberia responder, tales como:\n\n- quejas o errores de facturacion \n\n- preguntas que no se encuentran en nuestra seccion de preguntas frecuentes",
+        "height": 192,
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "6718da9c-b3b0-445b-a939-510532e79bc6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Mensaje del cliente:  {{ $json['Mensaje:'] }}"
+            },
+            {
+              "role": "system",
+              "content": "Eres un clasficador de mensajes en flexdata.\nEvalua si el mensaje del cliente es SIMPLE o COMPLEJO.\n\n-SIMPLE: El mensaje del cliente es sencillo si se puede responder consultando las **preguntas frecuentes** que aparecen a continuacion. \n\n-COMPLEJO: Incluye quejas, cuestiones financieras y preguntas sobres solicitudes que no se abordan en las **preguntas frecuentes**.\n\n##Preguntas frecuentes:\n\n1. nuestro horario de atencion es de lunes a viernes, de 8:00 a 18:00.\n2. Para solicitar una factura duplocada, accede a https://flexdata.com.br/fatura.\n3. Para cancelar tu suscripcion, envia una solicitud a cancelamento@flexdata.com.br.\n4. Nuestro numero de telefeono es (11) 4000-1234.\n5. Tiempo de respuesta: hasta 24 horas habiles.\n\nEs importantisimo que solo devuelvas **SIMPLE** o **COMPLEJO**."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        128
+      ],
+      "id": "39def7f1-d405-4f64-867e-030d6855ac60",
+      "name": "Asistente de flex data",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b994e9b4-9bba-45d7-8718-36d1ea9752f8",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "SIMPLE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        128
+      ],
+      "id": "b4d5fdd2-684d-4aa0-86b4-522ad35a547f",
+      "name": "Es SIMPLE la consulta del cliente?"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Mensaje del cliente: {{ $('Edit Fields').item.json['Mensaje:'] }}"
+            },
+            {
+              "role": "system",
+              "content": "Eres un asistente virtual de flexData. tu meta es responder amablemente las preguntas frecuentes de clientes que aparecen a continuacion en **Preguntas frecuentes**. si la pregunta no está en **Preguntas Frecuentes** responde diciendo que el equipo de soporte entrará en contacto con ellos a la brevedad-\n\n##Preguntas frecuentes:\n\n1. nuestro horario de atencion es de lunes a viernes, de 8:00 a 18:00.\n2. Para solicitar una factura duplicada, accede a https://flexdata.com.br/fatura.\n3. Para cancelar tu suscripcion, envia una solicitud a cancelamento@flexdata.com.br.\n4. Nuestro numero de telefono es (11) 4000-1234.\n5. Tiempo de respuesta: hasta 24 horas habiles"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        48
+      ],
+      "id": "065fdafa-7eba-4d73-9e64-642fc02b34e4",
+      "name": "Respoder al cliente",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Edit Fields').item.json['destinatario:'] }}",
+        "subject": "={{ $('Edit Fields').item.json['Asunto:'] }}",
+        "bodyContent": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        48
+      ],
+      "id": "1737fad8-c1c7-46af-9d67-5b436f79dd6f",
+      "name": "Send a message1",
+      "webhookId": "789c4d4a-b831-4359-8e8e-aecf23da07ed",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "=ivangarciav1594@gmail.com",
+        "subject": "={{ $('Edit Fields').item.json['Asunto:'] }}",
+        "bodyContent": "=Hola! Ha llegado un nuevo ticket por resolver:\n\nCliente:{{ $('Edit Fields').item.json['destinatario:'] }}\n\nMensaje:{{ $json.output[0].content[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        240
+      ],
+      "id": "7f072c30-3472-4b76-bf54-9095a16a4656",
+      "name": "Send a message2",
+      "webhookId": "789c4d4a-b831-4359-8e8e-aecf23da07ed",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Para el FALSE en el agente del modelo hay que poner un mail con el objetivo de que sea para el humano que va a llevar a cabo las respuestas de las preguntas que el agente en nodo TRUE no pudo responder con la info proporcionada\n\ny como ejemplo pondré mi mail"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        432
+      ],
+      "typeVersion": 1,
+      "id": "baa17eb8-76a5-4d6c-a5b4-c040730c12de",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Genera una respuesta breve y cortes, sugerida para un agente humano.\nNo la envíes directamente al cliente.\nsimplemente resume el contexto y sugiere la respuesta que el agente puede dar."
+            },
+            {
+              "content": "=Mensaje del cliente: {{ $('Edit Fields').item.json['Mensaje:'] }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        240
+      ],
+      "id": "489f1c9c-ef4c-4be8-b1cc-c0ae69cf80b8",
+      "name": "agente desviador a un HUMANO",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Asistente de flex data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asistente virtual para responder preguntas automaticas": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Asistente de flex data": {
+      "main": [
+        [
+          {
+            "node": "Es SIMPLE la consulta del cliente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es SIMPLE la consulta del cliente?": {
+      "main": [
+        [
+          {
+            "node": "Respoder al cliente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "agente desviador a un HUMANO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respoder al cliente": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente desviador a un HUMANO": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
