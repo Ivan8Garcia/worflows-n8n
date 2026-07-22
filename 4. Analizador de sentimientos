@@ -1,0 +1,343 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bce74dbd-ec81-4c4d-bddf-c4eddf8c8a0a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e5cb73cd-ad26-41ea-aab6-a429c107fd44",
+              "name": "",
+              "value": "={{ $json.output[0].content[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "6f19ee32-ad69-4999-8482-9136ec702ef4",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "cdda50cb-dd5c-47e3-9826-01409da4a350",
+      "name": "Edit Fields",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=## Rol\nEres un analizador de satisfacción de comentarios de flexData.\nTu meta es analizar el listado de **feedback** y completar la siguiente salida en español de américa latina.\n\n## Salida\nResponde **exclusivamente** en formato JSON válido, con la siguiente estructura:\n{\n \"Cliente\": {{ $json.Cliente }},\n \"Sentimento\": \"positivo\" | \"negativo\" | \"neutro\",\n \"Resumen\": \"una frase corta\",\n \"Sugerencia\": \"Si Sentimento=negativo, describe una mejora; caso contrario describe que no se necesita una mejora\"\n}\n\n## Importante\n- No incluyas NADA fuera de la estructura JSON indicada en la **Salida**"
+            },
+            {
+              "content": "=Fecha:{{ $json.Fecha }}\n\nCliente:{{ $json.Cliente }}\n\nCanal:{{ $json.Canal }}\n\nFeedback: {{ $json.Feedback }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "fa03be3b-0247-4bcc-a1da-cee33a1dc5a8",
+      "name": "Analizador de sentimientos",
+      "credentials": {
+        "openAiApi": {
+          "id": "yD8DhEr3GpQDDAjH",
+          "name": "OpenAI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4",
+          "mode": "list",
+          "cachedResultName": "Planilla de clientes de flex data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 219591539,
+          "mode": "list",
+          "cachedResultName": "feedback",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit#gid=219591539"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e5732506-a898-4ad6-8fc7-1c685a222dc6",
+      "name": "obtener feedback de clientes",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "k3TMGltsuusNzv4y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b23c6fda-18eb-470a-9bab-6b1b55b1fe3b",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "\"negativo\"",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        0
+      ],
+      "id": "1b61ac68-2032-49c9-bf4e-6d887a2c8ba8",
+      "name": "es NEGATIVO el feedback?"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.output[0].content[0].text }}"
+            },
+            {
+              "role": "system",
+              "content": "##Rol\nRedactor. Tu meta es redactar la informacion utilizando negritas y clasificando la informacion de manera ordenada para una correcta lectura.\n\n##Contexto\n-Recibirás una estructura JSON sobre la cual debes trabajar pero sin modificar su contenido semantico\n\n##Salida\nDevuelve la respuesta en formato HTML, usando <b> para titulos y <br> para saltos de linea. no uses Markdown."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        -80
+      ],
+      "id": "36ddddfb-ed4e-4e81-8e5f-8c8022e4c61c",
+      "name": "Organizador de texto",
+      "credentials": {
+        "openAiApi": {
+          "id": "yD8DhEr3GpQDDAjH",
+          "name": "OpenAI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toRecipients": "ivangarciav1594@gmail.com",
+        "subject": "Analisis de feedback",
+        "bodyContent": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -80
+      ],
+      "id": "7907464a-b0b5-4d9b-855b-80169e1a3944",
+      "name": "Send a message",
+      "webhookId": "14f401d1-ab18-4236-9f64-626b04e27c7d",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "para EDIT FIELDS, la funcion \n{{ $json.output[0].content[0].text }} tiene que ser la que se encuentra en \nINPUT-> text",
+        "height": 256,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "6c0db208-be1d-4f96-a865-6adb5b173bb7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## IF\n\nde igual manera en el nodo if, la funcion: \n{{ $json.output[0].content[0].text }}\n\ndebe ser la que proviene del INPUT->text",
+        "height": 336,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "36e0c359-6743-415b-928f-b2548d38043e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Organizador de texto\n\nla funcion:{{ $json.output[0].content[0].text }}\n\nviene del INPUT del IF, osea, de la pregunta y debemos de seleccionar el \"text\"",
+        "height": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1216,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "eb703aa2-2d10-4af8-817b-3ca73911af7c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## SEND a message\n\nigual, la funcion:\n{{ $json.output[0].content[0].text }}\n\ndebe ser extraida del organizador de texto->text",
+        "height": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "29a6697d-0ec7-4a9e-aac6-7f7ff5926411",
+      "name": "Sticky Note3"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "obtener feedback de clientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "es NEGATIVO el feedback?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analizador de sentimientos": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener feedback de clientes": {
+      "main": [
+        [
+          {
+            "node": "Analizador de sentimientos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "es NEGATIVO el feedback?": {
+      "main": [
+        [
+          {
+            "node": "Organizador de texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organizador de texto": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
