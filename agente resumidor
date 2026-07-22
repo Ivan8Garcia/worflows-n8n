@@ -1,0 +1,143 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cdf10d95-a8dd-489f-9157-124767069f55",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ajBF8UDvMMs1kSpw",
+          "name": "ivangarciav1594"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "despues de que el periodo de prueba termine, hay que crear una API en platform.openai.com"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "eddd0e4b-9940-41eb-99b3-5adc46f0c9f2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "sendTo": "ivangarcia1594@outlook.com",
+        "subject": "Resumen",
+        "message": "=Resumen del informe: {{ $json.output[0].content[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "e2681356-7df1-4714-9603-e5dcf8ba55ba",
+      "name": "Send a message",
+      "webhookId": "8224fd49-c108-42e0-8dc0-38968db4b14b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ajBF8UDvMMs1kSpw",
+          "name": "ivangarciav1594"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "eres asistente y te encargas de resumir correos electronicos extensos en español latinoamericano. genere hasta 5 puntos claves breves y claros, seguidos de  una frase ejecutiva. no incluyas informacion que no esté en el correo electronico"
+            },
+            {
+              "content": "={{ $json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7b0e3086-b402-4bee-a50e-a941595cc4f8",
+      "name": "agente resumidor",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "content": "primer paso: llega un texto largo al mail\n\nsegundo paso: el agente lo resume\n\ntercer paso: se envia automaticamente al destinatario",
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "86a276d6-2586-45db-be96-f1a7d7f10289",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "agente resumidor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente resumidor": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
