@@ -1,0 +1,213 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ab8037b8-b102-4783-b4b9-6a8a69f7bc2a",
+      "name": "When chat message received",
+      "webhookId": "e351d473-ce99-4242-b98e-8e1ba7f6078b"
+    },
+    {
+      "parameters": {
+        "query": "={{ $json.chatInput }}",
+        "options": {
+          "max_results": 5,
+          "time_range": "week",
+          "include_raw_content": true
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d8e805ee-0ef7-4ca8-9e61-d722ee4575da",
+      "name": "Search",
+      "credentials": {
+        "tavilyApi": {
+          "id": "FrfzOq7Z4ILNx5H7",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d5b099c3-4912-4418-9dda-b2b1ad75907e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output[0].content[0].text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        976,
+        0
+      ],
+      "id": "d1b7f79a-3f6c-45ee-a19c-88009994a41a",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Eres un agente que hace resumenes de noticias. Te enviaré una noticia y quiero que hagas un resumen con los puntos mas relevantes.no lo debes crear en estilo markdown, sino texto puro. añade emojis para que se vea bonita la publicacion \n\n\nno quiero que añadas ningun comentario adicional, solo devuelve el resumen.\n\nTexto:\n{{ $json.raw_content }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "c889566d-8831-4375-b9d7-32923704e252",
+      "name": "Message a model1",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Eres un agente redactor de linkedin, te enviare un texto enorme que es una combinacion de resumenes de las noticias de la ultima semana sobre algun tema.\n\ncon este texto debes escribir un post para mi linkedin personal, con los puntos mas relevantes. quiero que añadas hashtags al final.\n\nno quiero que añadas ningun comentario adicional, solo devuelve el post final para ser publicado.\n\n\ntexto: {{ $json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "7f7f4469-d9c6-4fb2-8abe-5b5832996a29",
+      "name": "Message a model2",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "f9f7ba63-cbce-4e73-bb4b-f40daef0ee92",
+      "name": "Create a post"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
