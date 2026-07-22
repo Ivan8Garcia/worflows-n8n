@@ -1,0 +1,183 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "653d13f9-40d4-4129-b13a-a5c3a8541fba",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ajBF8UDvMMs1kSpw",
+          "name": "ivangarciav1594"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "25640d60-22e3-4248-9317-d978b1c922c6",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "@outlook.com",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "227a527f-219d-4c81-a56b-7f3ce1f477c6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "89746850-7858-4335-ae8b-b8c232ec63c8",
+      "name": "Reply to a message",
+      "webhookId": "5f7410ff-c943-45d7-8be5-641e96cf739b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ajBF8UDvMMs1kSpw",
+          "name": "ivangarciav1594"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-nano",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-NANO"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Eres un agente contestador de emails. soy representante de la agencia de viajes  imatches y me llamo Juan. te enviaré un correo que acabo de recibir  y tu deberás crear la respuesta automática. sin añadir comentarios, solo el texto puro de la respuesta.no quiero que tenga asunto, solo el cuerpo del email.\n\nEmail recibido:\n {{ $json.snippet }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "e0dfb2f0-7db0-4e0b-a014-978979187bcd",
+      "name": "agente contestador de emails",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "content": "## disparador automatico al recibir un email pidiendo informacion ",
+        "height": 176,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "c44605c9-8fa3-4770-afe0-732d02db907d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## envio  automatico al usuario que pide informacion",
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "071be749-df8c-4412-a335-d983035a6b6b",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "agente contestador de emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente contestador de emails": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
