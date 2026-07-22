@@ -1,0 +1,279 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "26b618ae-fa82-40ac-a54c-b0e0c5da44c4",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        208
+      ],
+      "id": "abbfb45f-5a02-4651-81a5-3e18607ca51e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "yD8DhEr3GpQDDAjH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4",
+          "mode": "list",
+          "cachedResultName": "Planilla de clientes de flex data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2047332641,
+          "mode": "list",
+          "cachedResultName": "pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit#gid=2047332641"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $now.format('dd-MM-yyyy') }}",
+            "Canal": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Canal', `Describe si el mensaje viene de gmail, outlook, linkedin, instagram o whatsapp, etc.`, 'string') }}",
+            "Cliente": "={{ $json.from }}",
+            "Asunto": "={{ $json.subject }}",
+            "Mensaje": "={{ $json.bodyPreview }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Asunto",
+              "displayName": "Asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mensaje",
+              "displayName": "Mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        224
+      ],
+      "id": "3b2fe930-5c07-4db2-82df-7d60c7ddde5a",
+      "name": "pedidos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "k3TMGltsuusNzv4y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Fecha:{{ $now.format('dd-MM-yyyy') }}\n\nCliente:{{ $json.from }}\n\nAsunto:{{ $json.subject }}\n\nMensaje:{{ $json.bodyPreview }}",
+        "options": {
+          "systemMessage": "## Rol\nEres Pablo. Agente de ventas orientado a la atención al cliente para la empresa FlexData. Tu meta es completar la planilla y responde al cliente con un tono amable, amigable y siempre guiándolo con su consulta y motivandolo a finalizar el pedido en caso de que haya solicitado algo.\n\n## Tools\n- Utiliza la herramienta `pedidos` y completa la planilla con los datos correspondientes.\n\n## Respuesta\n- Debes responder en formato HTML usando negritas, colores, emojis de manera estructurada para que se vea agradable visualmente.\n- Si usas colores en los titulos, utiliza teoría del color para agradar visualmente al cliente.\n- Al inicio del mensaje presentate con tu nombre y la empresa de la que eres parte."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "ac29715f-47ad-494e-9e8f-757aa6ee20f3",
+      "name": "Pablo, agente de ventas",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Microsoft Outlook Trigger').item.json.from }}",
+        "subject": "={{ $('Microsoft Outlook Trigger').item.json.subject }}",
+        "bodyContent": "={{ $json.output }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "954f1c70-5dfb-46cd-b1fb-deff732fa53d",
+      "name": "Send a message",
+      "webhookId": "9d857b25-d3da-44ba-9de2-a2ee8440d286",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Send a message\n\nEn la funcion: {{ $json.output }}, debemos colocar la que venga de PABLO-> OUTPUT",
+        "height": 208,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        496,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "57928d21-a52f-4aff-8bb0-271b114531f8",
+      "name": "Sticky Note"
+    }
+  ],
+  "connections": {
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pablo, agente de ventas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pablo, agente de ventas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pedidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pablo, agente de ventas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pablo, agente de ventas": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Microsoft Outlook Trigger": [
+      {
+        "id": "AQMkADAwATNiZmYAZC1kN2NjAC1jOWQwLTAwAi0wMAoARgAAAzGdaoUZ8rBGnaj0gEIZ2gAHAOLQRvXYlb1DtLvBLKT0KE8AAAIBDAAAAOLQRvXYlb1DtLvBLKT0KE8ACWWXzoUAAAA=",
+        "conversationId": "AQQkADAwATNiZmYAZC1kN2NjAC1jOWQwLTAwAi0wMAoAEAD1Mg3gwK1hSp8JLvRRkRYS",
+        "subject": "Pedido de Notebook ",
+        "bodyPreview": "Hola tengo una escuela donde necesito adquirir 10 notebooks. No se exactamente cuáles comprar porque no conozco mucho de eso pero quiero notebooks que estén equilibradas entre precio y calidad para mis alumnos",
+        "from": "ivangarcia1594@outlook.com",
+        "to": [
+          "ivangarcia1594@outlook.com"
+        ],
+        "categories": [],
+        "hasAttachments": false
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
