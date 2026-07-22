@@ -1,0 +1,78 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/Ivan8Garcia",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "https://github.com/Ivan8Garcia/Proyectos-n8n-RAG-AgentesIA/",
+          "mode": "url"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "132da6c5-ed70-42e5-9e8b-478e4174eb4f",
+      "name": "Github Trigger",
+      "webhookId": "f1caac84-f66e-48ff-b5e4-251a57a368b8",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "QwuoVqD5Myy0O2oo",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ivangarcia1594@outlook.com",
+        "subject": "New Pull Request from: ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "31cfd6cb-d222-4b21-8875-c417f8e1a9bc",
+      "name": "Send a message",
+      "webhookId": "5190d129-8194-4082-897d-199c6d8c9182",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ajBF8UDvMMs1kSpw",
+          "name": "ivangarciav1594"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
