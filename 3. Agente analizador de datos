@@ -1,0 +1,244 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Mensaje }}",
+        "options": {
+          "systemMessage": "## Rol\n- Eres un analista de datos de la empresa FlexData\n- Tu meta es transformar datos numéricos en un resumen ejecutivo, claro y natural en español de América Latina.\n\n## Fuente de datos\n- Utiliza la tool `Clientes de FlexData` para extraer los datos."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4a9c01d4-d22a-4be2-8157-c00b22891a83",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4",
+          "mode": "list",
+          "cachedResultName": "Planilla de clientes de flex data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hjTv4xcT1pm2mBneTjaOoj0Nxpf79qKdj_bLo6FxbS4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        368,
+        208
+      ],
+      "id": "38bfd0e6-519f-4d4d-92c3-6282a0351b6d",
+      "name": "Clientes de FlexData",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "k3TMGltsuusNzv4y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        208
+      ],
+      "id": "56c7c9bb-3a68-4448-899b-343ba2f6f357",
+      "name": "OpenAI Chat Model",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Edit Fields').item.json.Destinatario }}",
+        "subject": "={{ $('Edit Fields').item.json.Asunto }}",
+        "bodyContent": "=Reporte estadistico: {{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "afb9dd49-f892-4a20-b2da-f8c575929294",
+      "name": "Send a message",
+      "webhookId": "74369135-a849-4da5-94dd-627a473bb084",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "98eb1f95-948d-4d8d-86a1-557499065739",
+      "name": "Microsoft Outlook Trigger",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "JeS77VvvwJZ21JzW",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "42f7398f-53ae-451c-9a0c-df680a85957c",
+              "name": "Mensaje",
+              "value": "={{ $json.bodyPreview }}",
+              "type": "string"
+            },
+            {
+              "id": "2b79728e-72ac-4bbc-aea3-183ad384e1fa",
+              "name": "Destinatario",
+              "value": "={{ $json.from }}",
+              "type": "string"
+            },
+            {
+              "id": "3516ac22-fed2-4bd9-9704-378072168c80",
+              "name": "Asunto",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        0
+      ],
+      "id": "368ff9b2-ce2a-44e7-95c2-63dcaff74fc6",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clientes de FlexData": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Microsoft Outlook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Microsoft Outlook Trigger": [
+      {
+        "id": "AQMkADAwATNiZmYAZC1kN2NjAC1jOWQwLTAwAi0wMAoARgAAAzGdaoUZ8rBGnaj0gEIZ2gAHAOLQRvXYlb1DtLvBLKT0KE8AAAIBDAAAAOLQRvXYlb1DtLvBLKT0KE8ACWULY10AAAA=",
+        "conversationId": "AQQkADAwATNiZmYAZC1kN2NjAC1jOWQwLTAwAi0wMAoAEABRJkcN9mUGSL00GYz2M7BV",
+        "subject": "Informe de datos ",
+        "bodyPreview": "Quiero saber el total de ventas y cuál es la media de reclamos que tenemos",
+        "from": "ivangarcia1594@outlook.com",
+        "to": [
+          "ivangarcia1594@outlook.com"
+        ],
+        "categories": [],
+        "hasAttachments": false
+      }
+    ],
+    "Edit Fields": [
+      {
+        "Mensaje": "Quiero saber el total de ventas y cuál es la media de reclamos que tenemos",
+        "Destinatario": "ivangarcia1594@outlook.com",
+        "Asunto": "Informe de datos "
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "97f2e5f6176f6ab075af3eb928b532f237bd2d166bece4f517028d8f9e45ef8e"
+  }
+}
